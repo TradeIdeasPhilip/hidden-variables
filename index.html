@@ -5,20 +5,121 @@
     <!-- vite.svg was located in ./public/ -->
     <!-- <link rel="icon" type="image/svg+xml" href="/vite.svg" /> -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title></title>
+    <title>Hidden Variables — My Solution</title>
     <script type="module" src="/src/main.ts"></script>
     <!-- Do NOT include or reference CSS here.  See main.ts for the preferred way to include a css file. -->
   </head>
   <body>
-    <ul>
-      <li>HTML is working.</li>
-      <li>CSS is <span class="css-test">broken.</span><span></span></li>
-      <li>TypeScript is <span id="typescriptStatus">broken</span>.</li>
-      <li>
-        <a href="https://tradeideasphilip.github.io/typescript-getting-started/"
-          >More information</a
-        >.
-      </li>
-    </ul>
+    <h1>Goal</h1>
+    <p>
+      My solution to hidden variables, spooky action at a distance, Bell's
+      inequality, etc.
+    </p>
+    <h1>Overview</h1>
+    <p>Let's keep this model simple:</p>
+    <table>
+      <tr>
+        <td><b>One</b> type of particle (at a time),</td>
+        <td><div class="stage-direction">Draw a simple sphere.</div></td>
+      </tr>
+      <tr>
+        <td><b>One</b> hidden variable (per particle), and</td>
+        <td>
+          <div class="stage-direction">
+            Draw a sphere with two halves. I still need to pick two colors.
+            rotate it around different ways. Add words like “red up”, “red
+            left”, “red toward users”, etc. And add numbers like longitude and
+            longitude.
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td><b>One</b> measurement.</td>
+        <td>
+          <div class="stage-direction">
+            Draw a sphere with two colors. Initially leave these colors in a
+            fixed position. Add a dot moving around the sphere. Show the inputs
+            as two numbers, tracking the dot. Constantly show the output.
+            Highlight that there are only two possible outputs. (I.e. show them
+            both on the screen and highlight which one is the current
+            measurement.) Initially title the result as “Would be:”. Every once
+            in a while it says “measuring”and “Is:” replaces “Would Be:”. The
+            dot stops moving. The colors move around a lot in a cool and jerky
+            movements. The color under the dot never changes. The colors stop
+            moving and after a brief pause, jump to the top of the loop.
+          </div>
+        </td>
+      </tr>
+    </table>
+    <h1>Particle</h1>
+    <p>Imagine a photon or an electron.</p>
+    <p>
+      I'm drawing the particles as spheres for convenience. In fact, the
+      particles might be points or might be too small to measure. The important
+      thing is that I can highlight directions relative to the particle.
+    </p>
+    <h1>Measurement</h1>
+    <p>These are the standard measurements.</p>
+    <p>
+      You can control the direction the measurement equipment is pointing. You
+      can describe these with two numbers, analogous to longitude and latitude.
+      I display that direction as a dot on the surface of the sphere.
+    </p>
+    <p>
+      The output of the measurement is a single value. In this representation
+      the result will be a color. The output can be interpreted as any Boolean
+      value, e.g. true vs. false, or spin up vs. spin down.
+    </p>
+    <h1>Hidden Variable</h1>
+    <p>This is my take. I have not seen this anywhere else.</p>
+    <p>
+      When we talk about a quantum property like spin or polarization, I
+      represent that as a direction: Which way is the red side pointing? You can
+      describe this as two numbers, the latitude and the longitude of the center
+      of the red hemisphere.
+    </p>
+    <p>
+      When you make a measurement, two things happen. The first part is
+      completely deterministic. If the measurement apparatus is point anywhere
+      in the red area, the result of the measurement will be red. Otherwise the
+      result will be blue.
+    </p>
+    <p>
+      The second step is to randomize the direction of the red part. The
+      resulting position will <u>not</u> change the result if the exact same
+      test is repeated. I.e. only half the possible orientations are legal.
+      Otherwise we cannot prediction the exact orientation after the
+      measurement, so I will call it <i>random</i>.
+    </p>
+    <p>
+      This is how my version of a hidden variable differs from the versions I've
+      seen. Note that my measurement step is always deterministic. There is
+      randomness at the end of my measurement, but the random value will not be
+      used until the next measurement.
+    </p>
+    <h1>Example: Single Particle</h1>
+    <div class="stage-direction">
+      Measure it once then rotate n° and measure it again.
+    </div>
+    <h1>Example: Three in a Row</h1>
+    <div class="stage-direction">
+      Three filters in a row, like 3 sheets of polarized film.
+    </div>
+    <h1>Example: Entangled Particles</h1>
+    <div class="stage-direction">
+      Create 2 particles with random but opposite hidden variables. Show them
+      moving away from each other, toward 2 pieces of measuring equipment. One
+      will always point straight down. The other will spin around to a random
+      place, but still on the outside of the circle. Measure both. Keep tables
+      keeping track of the results. Repeat animation forever.
+    </div>
+    <h1>Testing / Samples / Notes / Temp</h1>
+    <div class="stage-direction">
+      Under Construction! Click
+      <a href="https://github.com/TradeIdeasPhilip">here</a> for more
+      information about this document.
+    </div>
+    <p>Call <code>doIt()</code> each time.</p>
+    <pre>123 !@#$%^&*() 456 qwerty 890</pre>
   </body>
 </html>

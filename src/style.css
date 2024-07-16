@@ -1,13 +1,48 @@
+@import url("https://fonts.googleapis.com/css2?family=Oooh+Baby&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap");
+
 body {
-  font-size: 300%;
-  font-family: fantasy;
+  font-family: "Cormorant Garamond", serif;
 }
 
-.css-test {
-  text-decoration: hsl(278, 100%, 50%, 0.666) wavy line-through 0.2em;
+/* These are notes from me to me.  The should all disappear before this document is done.
+ * The idea is to look like a "yellow sticky".
+ */
+div.stage-direction {
+  font-family: "Oooh Baby", cursive;
+  font-size: 1.5rem;
+  margin: 1em;
+  padding: 0.2em 0.3em;
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
+  padding-left: 0.3em;
+  padding-right: 0.6em;
+  background-color: #ffff8f;
+  color: cornflowerblue;
+  box-shadow: black 0.075em 0.075em 0.45em 0.05em;
+  text-align: justify;
 }
 
-.css-test + ::before {
-  color: hsl(278, 100%, 50%);
-  content: " working.";
+code,
+pre {
+  font-family: "Nanum Gothic Coding", monospace;
+}
+
+code {
+  background-color: lightblue;
+  border-radius: 0.25em;
+  padding-left: 0.25em;
+  padding-right: 0.25em;
+  color: blue;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Abril Fatface", serif;
 }

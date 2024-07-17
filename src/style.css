@@ -5,16 +5,28 @@
 
 body {
   font-family: "Cormorant Garamond", serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  padding: 0;
 }
 
-/* These are notes from me to me.  The should all disappear before this document is done.
+#main {
+  max-width: 100ch;
+  display: flex;
+  flex-direction: column;
+  margin-left: 2em;
+  margin-right: 2em;
+}
+
+/* These are notes from me to me.  These should all disappear before this document is done.
  * The idea is to look like a "yellow sticky".
  */
 div.stage-direction {
   font-family: "Oooh Baby", cursive;
   font-size: 1.5rem;
   margin: 1em;
-  padding: 0.2em 0.3em;
   padding-top: 0.2em;
   padding-bottom: 0.2em;
   padding-left: 0.3em;
@@ -23,6 +35,17 @@ div.stage-direction {
   color: cornflowerblue;
   box-shadow: black 0.075em 0.075em 0.45em 0.05em;
   text-align: justify;
+}
+
+p {
+  text-align: justify;
+  margin-top: 0.4em;
+  margin-bottom: 0.4em;
+  text-indent: 0.5em;
+}
+
+h1 + p {
+  text-indent: 0;
 }
 
 code,
@@ -45,4 +68,7 @@ h4,
 h5,
 h6 {
   font-family: "Abril Fatface", serif;
+  font-weight: normal;
+  text-indent: -1rem;
+  margin-bottom: 0.4rem;
 }

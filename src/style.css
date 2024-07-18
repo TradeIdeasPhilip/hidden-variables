@@ -72,3 +72,27 @@ h6 {
   text-indent: -1rem;
   margin-bottom: 0.4rem;
 }
+
+g.sphere {
+  --x: 0;
+  --y: 0;
+  --diameter: 1;
+  transform: translate(var(--x), var(--y)) scale(var(--diameter));
+}
+
+g.sphere > :nth-child(1) {
+  fill: #ff7d00;
+}
+
+g.sphere > path {
+  fill: white;
+}
+
+g.sphere > :nth-child(3) {
+  stroke: none;
+  fill: url(#sphere);
+}
+
+g.sphere > circle {
+  r : 0.5;
+}

@@ -2,7 +2,7 @@
 import "./style.css";
 
 import { getById } from "phil-lib/client-misc";
-import { positiveModulo } from "./utility";
+import { AnimationLoop, positiveModulo } from "./utility";
 import { initializedArray } from "phil-lib/misc";
 
 class Sphere {
@@ -204,19 +204,13 @@ const spheres = initializedArray(5, (index) => {
 });
 (window as any).spheres = spheres;
 
-function animateSoon() {
-  requestAnimationFrame(animate);
-}
-
-function animate(timestamp: number) {
-  animateSoon();
+new AnimationLoop((timestamp) => {
   spheres[0].zAngle = timestamp / 700;
   spheres[3].yAngle = timestamp / 831;
   spheres[4].zAngle = timestamp / 607;
   spheres[4].yAngle = timestamp / 501;
-}
+});
 
-animateSoon();
 // TODO fix these bugs:
 // spheres[3].yAngle = timestamp / 831; shows a bug.
 //   The animation jumps every time the diving line crosses over the half way point.

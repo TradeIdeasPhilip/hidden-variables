@@ -35,3 +35,27 @@ export function positiveModulo(numerator: number, denominator: number) {
     return simpleAnswer;
   }
 }
+
+// Note that I modified this some after I copied it.
+// I removed the initial call to onWake.
+// That was causing some problems.
+// Now onWake() is only called by Chrome, and the time parameter should always be right.
+export class AnimationLoop {
+  constructor(private readonly onWake: (time: DOMHighResTimeStamp) => void) {
+    this.callback = this.callback.bind(this);
+    // This next line isn't quite right.
+    // Sometimes this timestamp is greater than the timestamp of the first requestAnimationFrame() callback.
+    // TODO fix it.
+    // this.callback(performance.now());
+  }
+  #cancelled = false;
+  cancel() {
+    this.#cancelled = true;
+  }
+  private callback(time: DOMHighResTimeStamp) {
+    if (!this.#cancelled) {
+      requestAnimationFrame(this.callback);
+      this.onWake(time);
+    }
+  }
+}

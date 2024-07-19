@@ -25,6 +25,15 @@ class Sphere {
     if (b < 0 || b > 1 || !isFinite(b)) {
       throw new Error("wtf");
     }
+    /**
+     * I was having trouble with numbers very close to 0.  SVG should be able to read scientific notation,
+     * but I was seeing problems and I each time I fixed the problem by replacing something like "1.23456e-20"
+     * with "0".  I haven't noticed this issue before.
+     */
+    const format = Intl.NumberFormat("en-US", {
+      notation: "standard",
+    }).format;
+
     const radius = 0.5;
     const top = `0,${-radius}`;
     const bottom = `0,${radius}`;
@@ -34,7 +43,11 @@ class Sphere {
     const directionA = a >= 0.5 ? clockwise : counterclockwise;
     const radiusB = Math.abs(b - radius);
     const directionB = b <= 0.5 ? clockwise : counterclockwise;
-    const d = `M ${top} A ${radiusA},${radius} 3.14159 0 ${directionA} ${bottom} A ${radiusB},${radius} 3.14159 0 ${directionB} ${top}`;
+    const d = `M ${top} A ${format(
+      radiusA
+    )},${radius} 3.14159 0 ${directionA} ${bottom} A ${format(
+      radiusB
+    )},${radius} 3.14159 0 ${directionB} ${top}`;
     return d;
   }
   readonly #top = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -142,13 +155,7 @@ async function overview2() {
   const sphere = new Sphere();
   sphere.x = 0.5;
   sphere.y = 0.5;
-  sphere.yAngle = Math.PI / 2 - 0.00001;
-  // TODO / Bug fix:
-  // Sphere fails at exactly yAngle= Math.PI/2 !!!!
-  // That used to work!
-  //   It probably broke when I changed createHighlight() to take two arguments.
-  // And the white part looks off center.
-  // Notice other bug reports, below, which are probably related.
+  sphere.yAngle = Math.PI / 2;
   svg.appendChild(sphere.top);
   const descriptionDiv = getById("overview2text", HTMLDivElement);
   descriptionDiv.innerText = "Orange side pointing to your right.";
@@ -170,13 +177,13 @@ const spheres = initializedArray(5, (index) => {
     case 1: {
       sphere.y = 1.5;
       sphere.x = 2.5;
-      sphere.yAngle = Math.PI + 0.25;
+      sphere.yAngle = Math.PI / 2;
       break;
     }
     case 2: {
       sphere.y = 2.5;
       sphere.x = 2.5;
-      sphere.yAngle = Math.PI / 2 + 0.25;
+      sphere.yAngle = (3 * Math.PI) / 2;
       break;
     }
     case 3: {
@@ -220,4 +227,7 @@ animateSoon();
 // Sometimes the crescent shape has some weird effects.
 //   Notice the little green line just to the left of the top of the the green crescent.
 //   And look at the two spheres below it.  A little white bit of the bottom sphere is covering the sphere immediately above it.
+//     The previous line is no longer accurate.
+//     I changed the circle with the problem, and I fixed a strange bug.
+//     Either or both of those could be why I don't see this bug any more.
 //   The two spheres which are rotating about the y axis show the same bug in a constantly changing way, sometime huge.

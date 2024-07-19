@@ -47,6 +47,7 @@ export class AnimationLoop {
     // Sometimes this timestamp is greater than the timestamp of the first requestAnimationFrame() callback.
     // TODO fix it.
     // this.callback(performance.now());
+    requestAnimationFrame(this.callback);
   }
   #cancelled = false;
   cancel() {

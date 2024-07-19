@@ -94,5 +94,24 @@ g.sphere > :nth-child(3) {
 }
 
 g.sphere > circle {
-  r : 0.5;
+  r: 0.5;
+}
+
+#overview1,
+#overview2svg {
+  width: 5em;
+  height: 5em;
+}
+
+#overview2top {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.7em;
+}
+
+#overview2text {
+  width: 10ch;
+  flex-grow: 1;
 }

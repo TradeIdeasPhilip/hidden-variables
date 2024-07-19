@@ -129,6 +129,32 @@ class Sphere {
   }
 }
 
+{
+  const svg = getById("overview1", SVGSVGElement);
+  const sphere = new Sphere();
+  sphere.x = 0.5;
+  sphere.y = 0.5;
+  svg.appendChild(sphere.top);
+}
+
+async function overview2() {
+  const svg = getById("overview2svg", SVGSVGElement);
+  const sphere = new Sphere();
+  sphere.x = 0.5;
+  sphere.y = 0.5;
+  sphere.yAngle = Math.PI / 2 - 0.00001;
+  // TODO / Bug fix:
+  // Sphere fails at exactly yAngle= Math.PI/2 !!!!
+  // That used to work!
+  //   It probably broke when I changed createHighlight() to take two arguments.
+  // And the white part looks off center.
+  // Notice other bug reports, below, which are probably related.
+  svg.appendChild(sphere.top);
+  const descriptionDiv = getById("overview2text", HTMLDivElement);
+  descriptionDiv.innerText = "Orange side pointing to your right.";
+}
+overview2();
+
 const testSvg = getById("test", SVGSVGElement);
 const spheres = initializedArray(5, (index) => {
   const sphere = new Sphere();

@@ -9,7 +9,7 @@ import {
   positiveModulo,
   polarToRectangular,
 } from "./utility";
-import { initializedArray } from "phil-lib/misc";
+import { initializedArray, makeLinear } from "phil-lib/misc";
 
 function makeCircle(numberOfSegments: number) {
   if (numberOfSegments % 4 == 0) {
@@ -79,22 +79,9 @@ class Sphere {
     if (b < 0 || b > 1 || !isFinite(b)) {
       throw new Error("wtf");
     }
-    const format = this.FORMAT;
-    const radius = 0.5;
-    const top = `0,${-radius}`;
-    const bottom = `0,${radius}`;
-    const clockwise = "1";
-    const counterclockwise = "0";
-    const radiusA = Math.abs(a - radius);
-    const directionA = a >= 0.5 ? clockwise : counterclockwise;
-    const radiusB = Math.abs(b - radius);
-    const directionB = b <= 0.5 ? clockwise : counterclockwise;
-    const d = `M ${top} A ${format(
-      radiusA
-    )},${radius} 3.14159 0 ${directionA} ${bottom} A ${format(
-      radiusB
-    )},${radius} 3.14159 0 ${directionB} ${top}`;
-    return d;
+    const left=makeLinear(0, 1, 1, -1);
+    const right = makeLinear(1, 1, 0, -1);
+    return this.squashedCircle(left(a),right(b),"real");
   }
   /**
    * This draws a circle.  The left and right halves can be scaled separately.  The top and bottom points
@@ -386,17 +373,7 @@ new AnimationLoop((timestamp) => {
   testSvg.appendChild(fakeCirclePath);
 }
 
-// TODO fix these bugs:
-// spheres[3].yAngle = timestamp / 831; shows a bug.
-//   The animation jumps every time the diving line crosses over the half way point.
-//   The animation is smooth at all other times.
+// TODO fix this:
 // The white never properly covers the orange right.
 //   It's fine where the orange and white are supposed to be touching.
 //   But where the white is touching the background color, you always see a little orange poking free.
-// Sometimes the crescent shape has some weird effects.
-//   Notice the little green line just to the left of the top of the the green crescent.
-//   And look at the two spheres below it.  A little white bit of the bottom sphere is covering the sphere immediately above it.
-//     The previous line is no longer accurate.
-//     I changed the circle with the problem, and I fixed a strange bug.
-//     Either or both of those could be why I don't see this bug any more.
-//   The two spheres which are rotating about the y axis show the same bug in a constantly changing way, sometime huge.

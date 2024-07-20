@@ -2,10 +2,64 @@
 import "./style.css";
 
 import { getById } from "phil-lib/client-misc";
-import { AnimationLoop, positiveModulo } from "./utility";
+import {
+  AnimationLoop,
+  findIntersection,
+  Point,
+  positiveModulo,
+  polarToRectangular,
+} from "./utility";
 import { initializedArray } from "phil-lib/misc";
 
+function makeCircle(numberOfSegments: number) {
+  if (numberOfSegments % 4 == 0) {
+    // There's a weird bug.  If a segment is almost perfectly vertical, it causes problems.
+    // TODO find and fix the bug.
+    throw new Error("TODO");
+  }
+  const samples = initializedArray(numberOfSegments + 1, (index) => {
+    const t = index / numberOfSegments;
+    const θ = (3 * Math.PI) / 2 - t * (2 * Math.PI);
+    const point: Point = polarToRectangular(0.5, θ);
+    const direction = θ - Math.PI / 2;
+    return { t, point, direction };
+  });
+  const segments = initializedArray(numberOfSegments, (index) => ({
+    from: samples[index],
+    to: samples[index + 1],
+  }));
+  let result = segments.map((segment) => {
+    const controlPoint = findIntersection(
+      {
+        x0: segment.from.point.x,
+        y0: segment.from.point.y,
+        slope: Math.tan(segment.from.direction),
+      },
+      {
+        x0: segment.to.point.x,
+        y0: segment.to.point.y,
+        slope: Math.tan(segment.to.direction),
+      }
+    );
+    if (!controlPoint) {
+      throw new Error("wtf");
+    }
+    return { controlPoint, segment };
+  });
+  return result;
+}
+const CIRCLE = makeCircle(10);
+(window as any).CIRCLE = CIRCLE;
+
 class Sphere {
+  /**
+   * I was having trouble with numbers very close to 0.  SVG should be able to read scientific notation,
+   * but I was seeing problems and I each time I fixed the problem by replacing something like "1.23456e-20"
+   * with "0".  I haven't noticed this issue before.
+   */
+  static readonly FORMAT = Intl.NumberFormat("en-US", {
+    notation: "standard",
+  }).format;
   /**
    * **TODO** fix this slightly out of date but not completely wrong documentation:
    * @param coverage How far the highlight should move to the right.
@@ -25,15 +79,7 @@ class Sphere {
     if (b < 0 || b > 1 || !isFinite(b)) {
       throw new Error("wtf");
     }
-    /**
-     * I was having trouble with numbers very close to 0.  SVG should be able to read scientific notation,
-     * but I was seeing problems and I each time I fixed the problem by replacing something like "1.23456e-20"
-     * with "0".  I haven't noticed this issue before.
-     */
-    const format = Intl.NumberFormat("en-US", {
-      notation: "standard",
-    }).format;
-
+    const format = this.FORMAT;
     const radius = 0.5;
     const top = `0,${-radius}`;
     const bottom = `0,${radius}`;
@@ -49,6 +95,105 @@ class Sphere {
       radiusB
     )},${radius} 3.14159 0 ${directionB} ${top}`;
     return d;
+  }
+  /**
+   * This draws a circle.  The left and right halves can be scaled separately.  The top and bottom points
+   * of the circle are fixed.
+   *
+   * Examples:
+   * - `Sphere.createHighlight(1,1)` will create a circle going counterclockwise.
+   * - `Sphere.createHighlight(-1,-1)` will create a circle going clockwise.
+   * - `Sphere.createHighlight(1,0)` will create the left half of circle going counterclockwise.
+   * - `Sphere.createHighlight(0,1)` will create the right half of circle going counterclockwise.
+   * - `Sphere.createHighlight(1,-0.5)` will create a crescent moon with the empty part on the right.
+   * - `Sphere.createHighlight(-0.75,1)` will create an even thinner crescent moon with the empty part on the left.
+   *
+   * Originally I tried doing this with the `A` path command.  It worked most of the time.  If the width was
+   * scaled to a value close to 0 I got weird results.  Exactly 0 worked, so I missed this in early testing.
+   * @param downRatio If this is 1, the path will start with the left half of a circle going counterclockwise.
+   * If this is 0.5 the left half of the circle will be squashed to have half the area.
+   * 0 will cause the left half of the circle to be empty, and a vertical line to be displayed on the screen.
+   * If this is negative, the down part will bow toward the right.
+   * @param backRatio  If this is 1, the path will end with the right half of a circle going counterclockwise.
+   * If this is 0.5 the right half of the circle will be squashed to have half the area.
+   * 0 will cause the right half of the circle to be empty, and a vertical line to be displayed on the screen.
+   * If this is negative, the up part will bow toward the left.
+   * @param mode "real" to display the circle as expected in production.  The rest are various debug options.
+   * @returns A valid value for the "d" attribute of a path.  (Add `path("` and `")` if you want to use this
+   * in a css property.)
+   */
+  static squashedCircle(
+    downRatio: number,
+    backRatio: number,
+    mode: "real" | "vertices" | "control points" | "control poly" | "vectors"
+  ): string {
+    const half = CIRCLE.length / 2;
+    const instructions = CIRCLE.map(({ controlPoint, segment }, index) => {
+      const ratio = index < half ? downRatio : backRatio;
+      const control: Point = { x: controlPoint.x * ratio, y: controlPoint.y };
+      const to = segment.to.point;
+      const final: Point = { x: to.x * ratio, y: to.y };
+      return { control, final };
+    });
+    const format = this.FORMAT;
+    switch (mode) {
+      case "real": {
+        const start = instructions.at(-1)!.final;
+        let result = `M ${format(start.x)}, ${format(start.y)} `;
+        instructions.forEach((instruction) => {
+          result += `Q ${format(instruction.control.x)},${format(
+            instruction.control.y
+          )} ${format(instruction.final.x)},${format(instruction.final.y)} `;
+        });
+        return result;
+      }
+      case "vertices": {
+        let result = "";
+        instructions.forEach((instruction) => {
+          result += `M ${format(instruction.final.x)},${format(
+            instruction.final.y
+          )} L ${format(instruction.final.x)},${format(instruction.final.y)} `;
+        });
+        return result;
+      }
+      case "control points": {
+        let result = "";
+        instructions.forEach((instruction) => {
+          result += `M ${format(instruction.control.x)},${format(
+            instruction.control.y
+          )} L ${format(instruction.control.x)},${format(
+            instruction.control.y
+          )} `;
+        });
+        return result;
+      }
+      case "control poly": {
+        const start = instructions.at(-1)!.control;
+        let result = `M ${format(start.x)}, ${format(start.y)} `;
+        instructions.forEach((instruction) => {
+          result += `L ${format(instruction.control.x)},${format(
+            instruction.control.y
+          )} `;
+        });
+        return result;
+      }
+      case "vectors": {
+        const length = 0.2;
+        let result = "";
+        CIRCLE.forEach((instruction, _index) => {
+          //if (index >= CIRCLE.length - 2) { return;}
+          const { point, direction } = instruction.segment.to;
+          const offset = polarToRectangular(length, direction);
+          result += `M ${format(point.x)},${format(point.y)} L ${format(
+            point.x + offset.x
+          )},${format(point.y + offset.y)} `;
+        });
+        return result + this.squashedCircle(1, 1, "control points");
+      }
+      default: {
+        throw new Error("wtf");
+      }
+    }
   }
   readonly #top = document.createElementNS("http://www.w3.org/2000/svg", "g");
   get top() {
@@ -162,6 +307,10 @@ async function overview2() {
 }
 overview2();
 
+////////
+// Temporary test stuff
+////
+
 const testSvg = getById("test", SVGSVGElement);
 const spheres = initializedArray(5, (index) => {
   const sphere = new Sphere();
@@ -183,7 +332,7 @@ const spheres = initializedArray(5, (index) => {
     case 2: {
       sphere.y = 2.5;
       sphere.x = 2.5;
-      sphere.yAngle = (3 * Math.PI) / 2;
+      sphere.yAngle = Math.PI / 2 + 0.01;
       break;
     }
     case 3: {
@@ -210,6 +359,32 @@ new AnimationLoop((timestamp) => {
   spheres[4].zAngle = timestamp / 607;
   spheres[4].yAngle = timestamp / 501;
 });
+
+{
+  const fakeCirclePath = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "path"
+  );
+  fakeCirclePath.setAttribute("d", Sphere.squashedCircle(1, 1, "real"));
+  fakeCirclePath.style.transform = "translate(1.5px, 0.5px)";
+  fakeCirclePath.style.fill = "orange";
+  fakeCirclePath.style.strokeWidth = "0.1px";
+  fakeCirclePath.style.stroke = "blue";
+  fakeCirclePath.style.strokeLinecap = "round";
+  testSvg.appendChild(fakeCirclePath);
+}
+
+{
+  const fakeCirclePath = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "path"
+  );
+  fakeCirclePath.setAttribute("d", Sphere.squashedCircle(-0.6667, 1, "real"));
+  fakeCirclePath.style.transform = "translate(2.5px, 0.5px)";
+  fakeCirclePath.style.fill = "lime";
+  fakeCirclePath.style.strokeLinecap = "round";
+  testSvg.appendChild(fakeCirclePath);
+}
 
 // TODO fix these bugs:
 // spheres[3].yAngle = timestamp / 831; shows a bug.

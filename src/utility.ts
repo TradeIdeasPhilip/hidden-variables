@@ -60,3 +60,44 @@ export class AnimationLoop {
     }
   }
 }
+
+// Copied from my curves repository.
+// I haven't pushed that repository to github yet, and I'm not sure why!
+// And I fixed something in this version.
+
+export type Point = { readonly x: number; readonly y: number };
+
+// TODO these should really be rays.  Two rays might not meet at all.
+// If they do meet, findIntersection() will give the right answer.
+// We need to know an angle, not a slope, to find that out.
+//
+// TODO if there is a problem matching the rays, we should draw a
+// straight line, instead of skipping the segment or drawing some
+// wild curves.  As learned from #SOME3.  Still skip the segment
+// if an input is NaN.
+export type Line = { x0: number; y0: number; slope: number };
+
+export function findIntersection(α: Line, β: Line): Point | undefined {
+  if (isNaN(α.slope) || isNaN(β.slope) || α.slope == β.slope) {
+    return undefined;
+  }
+  const αIsVertical = α.slope == Infinity || α.slope == -Infinity;
+  const βIsVertical = β.slope == Infinity || β.slope == -Infinity;
+  if (αIsVertical && βIsVertical) {
+    return undefined;
+  }
+  const x = αIsVertical
+    ? α.x0
+    : βIsVertical
+    ? β.x0
+    : (β.y0 - β.slope * β.x0 - α.y0 + α.slope * α.x0) / (α.slope - β.slope);
+  const y = αIsVertical
+    ? β.slope * (x - β.x0) + β.y0
+    : α.slope * (x - α.x0) + α.y0;
+  return { x, y };
+}
+
+// This is dead wrong in phil-lib/misc.ts!!!
+export function polarToRectangular(r: number, θ: number) {
+  return { x: Math.cos(θ) * r, y: Math.sin(θ) * r };
+}

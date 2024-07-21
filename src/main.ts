@@ -10,7 +10,13 @@ import {
   polarToRectangular,
   shuffleArray,
 } from "./utility";
-import { initializedArray, makeLinear, sleep } from "phil-lib/misc";
+import {
+  initializedArray,
+  LinearFunction,
+  makeBoundedLinear,
+  makeLinear,
+  sleep,
+} from "phil-lib/misc";
 
 /**
  * 180° (U-turn)
@@ -329,27 +335,67 @@ async function overview2() {
   sphere.y = 0.5;
   svg.appendChild(sphere.top);
   const descriptionSpan = getById("overview2changingText", HTMLSpanElement);
+  const descriptionDiv = getById("overview2allText", HTMLDivElement);
+
+  let getYAngle: LinearFunction | undefined;
+  let getZAngle: LinearFunction | undefined;
+  new AnimationLoop((timestamp) => {
+    if (getYAngle) {
+      sphere.yAngle = getYAngle(timestamp);
+    }
+    if (getZAngle) {
+      sphere.zAngle = getZAngle(timestamp);
+    }
+  });
+  let previousSettings: Settings = { description: "", yAngle: 0 };
   while (true) {
     const performed = new Array<Settings>();
     for (const opposites of shuffleArray([...actions])) {
+      descriptionDiv.style.opacity = "0";
+
       const settings = opposites[(Math.random() * 2) | 0];
+      const start = performance.now();
+      const animationDuration = 500;
+      const end = start + animationDuration;
+      getYAngle = makeBoundedLinear(
+        start,
+        previousSettings.yAngle,
+        end,
+        settings.yAngle
+      );
+      const previousZ = previousSettings.zAngle;
+      const newZ = settings.zAngle;
+      if (previousZ === undefined) {
+        if (newZ === undefined) {
+          // Don't care -> don't care.  It might matter in the middle so pick something randomly.
+          sphere.zAngle = Math.random() * d360;
+        } else {
+          // Don't care -> newZ.  Set newZ immediately.
+          sphere.zAngle = newZ;
+        }
+      } else {
+        if (newZ === undefined) {
+          // Something -> don't care.  Nothing to do.
+        } else {
+          // Something -> something.
+          getZAngle = makeBoundedLinear(start, previousZ, end, newZ);
+        }
+      }
+      await sleep(animationDuration);
+      getYAngle = undefined;
+      getZAngle = undefined;
       sphere.yAngle = settings.yAngle;
       if (typeof settings.zAngle == "number") {
         sphere.zAngle = settings.zAngle;
       }
+
+      descriptionDiv.style.opacity = "";
       descriptionSpan.innerText = settings.description;
-      // TODO animate the moves.
-      // Text changes to say "moving".
-      // If both from and to have undefined as the zAngle, then pick a random zAngle
-      //   and just animate the yAngle.
-      // If one has an undefined zAngle, the use the zAngle from the other,
-      //   and just animate the yAngle.  Make sure to go the fastest way.
-      // Else animate the change of the two angles at the same time.
-      //   Try rotating one of the zAngles, and updating the yAngle accordingly, to see if that makes for a faster path.
-      //   Make sure never to go the wrong way around a circle.
       await sleep(2000);
       performed.push(settings);
+      previousSettings = settings;
     }
+    // TODO Add the random one after every 3 cardinal directions.
   }
 }
 overview2();

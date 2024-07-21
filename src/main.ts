@@ -306,7 +306,6 @@ class Sphere {
   svg.appendChild(sphere.top);
 }
 
-// kinda toward you, up and to the left.
 async function overview2() {
   type Settings = {
     readonly yAngle: number;
@@ -337,65 +336,101 @@ async function overview2() {
   const descriptionSpan = getById("overview2changingText", HTMLSpanElement);
   const descriptionDiv = getById("overview2allText", HTMLDivElement);
 
-  let getYAngle: LinearFunction | undefined;
-  let getZAngle: LinearFunction | undefined;
-  new AnimationLoop((timestamp) => {
-    if (getYAngle) {
+  async function animateChange(
+    from: Settings,
+    to: Settings,
+    durationMS: number
+  ) {
+    descriptionDiv.style.opacity = "0";
+    const start = performance.now();
+    const end = start + durationMS;
+    const getYAngle = makeBoundedLinear(start, from.yAngle, end, to.yAngle);
+    let getZAngle: LinearFunction | undefined;
+    if (from.zAngle === undefined) {
+      if (to.zAngle === undefined) {
+        // Don't care -> don't care.  It might matter in the middle so pick something randomly.
+        sphere.zAngle = Math.random() * d360;
+      } else {
+        // Don't care -> newZ.  Set newZ immediately.
+        sphere.zAngle = to.zAngle;
+      }
+    } else {
+      if (to.zAngle === undefined) {
+        // Something -> don't care.  Nothing to do.
+      } else {
+        // Something -> something.
+        getZAngle = makeBoundedLinear(start, from.zAngle, end, to.zAngle);
+      }
+    }
+    const animationLoop = new AnimationLoop((timestamp) => {
       sphere.yAngle = getYAngle(timestamp);
+
+      if (getZAngle) {
+        sphere.zAngle = getZAngle(timestamp);
+      }
+    });
+    // TODO this often goes the long way.  Make it always choose the shortest path.
+    await sleep(durationMS);
+    animationLoop.cancel();
+    sphere.yAngle = to.yAngle;
+    if (typeof to.zAngle == "number") {
+      sphere.zAngle = to.zAngle;
     }
-    if (getZAngle) {
-      sphere.zAngle = getZAngle(timestamp);
-    }
-  });
+    descriptionDiv.style.opacity = "";
+    descriptionSpan.innerText = to.description;
+    await sleep(1500);
+  }
+
   let previousSettings: Settings = { description: "", yAngle: 0 };
   while (true) {
     const performed = new Array<Settings>();
     for (const opposites of shuffleArray([...actions])) {
-      descriptionDiv.style.opacity = "0";
-
       const settings = opposites[(Math.random() * 2) | 0];
-      const start = performance.now();
-      const animationDuration = 500;
-      const end = start + animationDuration;
-      getYAngle = makeBoundedLinear(
-        start,
-        previousSettings.yAngle,
-        end,
-        settings.yAngle
-      );
-      const previousZ = previousSettings.zAngle;
-      const newZ = settings.zAngle;
-      if (previousZ === undefined) {
-        if (newZ === undefined) {
-          // Don't care -> don't care.  It might matter in the middle so pick something randomly.
-          sphere.zAngle = Math.random() * d360;
-        } else {
-          // Don't care -> newZ.  Set newZ immediately.
-          sphere.zAngle = newZ;
-        }
-      } else {
-        if (newZ === undefined) {
-          // Something -> don't care.  Nothing to do.
-        } else {
-          // Something -> something.
-          getZAngle = makeBoundedLinear(start, previousZ, end, newZ);
-        }
-      }
-      await sleep(animationDuration);
-      getYAngle = undefined;
-      getZAngle = undefined;
-      sphere.yAngle = settings.yAngle;
-      if (typeof settings.zAngle == "number") {
-        sphere.zAngle = settings.zAngle;
-      }
-
-      descriptionDiv.style.opacity = "";
-      descriptionSpan.innerText = settings.description;
-      await sleep(2000);
+      await animateChange(previousSettings, settings, 500);
       performed.push(settings);
       previousSettings = settings;
     }
-    // TODO Add the random one after every 3 cardinal directions.
+    const recentYAngles = performed.map((settings) => settings.yAngle);
+    const minYAngle = Math.min(...recentYAngles);
+    const maxYAngle = Math.max(...recentYAngles);
+    if (minYAngle == maxYAngle) {
+      throw new Error("wtf");
+    }
+    const recentZAngles = performed.flatMap(({ zAngle }) =>
+      typeof zAngle == "number" ? positiveModulo(zAngle, d360) : []
+    );
+    if (recentZAngles.length != 2) {
+      throw new Error("wtf");
+    }
+    let minZAngle = Math.min(...recentZAngles);
+    let maxZAngle = Math.max(...recentZAngles);
+    let difference = maxZAngle - minZAngle;
+    if (difference > d180) {
+      [minZAngle, maxZAngle] = [maxZAngle, minZAngle + d360];
+      difference = maxZAngle - minZAngle;
+      if (difference > d180) {
+        throw new Error("");
+      }
+    }
+    function rangedPaddedRandom(min: number, max: number) {
+      let distance = max - min;
+      const padding = distance * 0.2;
+      min += padding;
+      max -= padding;
+      distance = max - min;
+      return Math.random() * distance + min;
+    }
+    const settings: Settings = {
+      // TODO this is hard to read.
+      // Maybe underline each of the three sections, but not the "kinda", the comma, or the "and"
+      // Maybe add a longer pause.
+      description: `kinda ${performed[0].description}, ${performed[1].description} and ${performed[2].description}`,
+      yAngle: rangedPaddedRandom(minYAngle, maxYAngle),
+      zAngle: rangedPaddedRandom(minZAngle, maxZAngle),
+    };
+    await animateChange(previousSettings, settings, 500);
+    previousSettings = settings;
+    await sleep(1500);
   }
 }
 overview2();

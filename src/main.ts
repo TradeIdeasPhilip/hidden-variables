@@ -8,8 +8,26 @@ import {
   Point,
   positiveModulo,
   polarToRectangular,
+  shuffleArray,
 } from "./utility";
-import { initializedArray, makeLinear } from "phil-lib/misc";
+import { initializedArray, makeLinear, sleep } from "phil-lib/misc";
+
+/**
+ * 180° (U-turn)
+ */
+const d180 = Math.PI;
+/**
+ * 360° (full circle)
+ */
+const d360 = 2 * d180;
+/**
+ * 90° (right angle)
+ */
+const d90 = d180 / 2;
+/**
+ * 45° (right angle)
+ */
+const d45 = d90 / 2;
 
 function makeCircle(numberOfSegments: number) {
   if (numberOfSegments % 4 == 0) {
@@ -19,9 +37,9 @@ function makeCircle(numberOfSegments: number) {
   }
   const samples = initializedArray(numberOfSegments + 1, (index) => {
     const t = index / numberOfSegments;
-    const θ = (3 * Math.PI) / 2 - t * (2 * Math.PI);
+    const θ = 3 * d90 - t * d360;
     const point: Point = polarToRectangular(0.5, θ);
-    const direction = θ - Math.PI / 2;
+    const direction = θ - d90;
     return { t, point, direction };
   });
   const segments = initializedArray(numberOfSegments, (index) => ({
@@ -79,9 +97,9 @@ class Sphere {
     if (b < 0 || b > 1 || !isFinite(b)) {
       throw new Error("wtf");
     }
-    const left=makeLinear(0, 1, 1, -1);
+    const left = makeLinear(0, 1, 1, -1);
     const right = makeLinear(1, 1, 0, -1);
-    return this.squashedCircle(left(a),right(b),"real");
+    return this.squashedCircle(left(a), right(b), "real");
   }
   /**
    * This draws a circle.  The left and right halves can be scaled separately.  The top and bottom points
@@ -217,8 +235,8 @@ class Sphere {
    * - It will cause the least obvious changes when we are displaying mostly one color and very little of the other.
    */
   set yAngle(newValue) {
-    const clampedAngle = positiveModulo(newValue, 2 * Math.PI);
-    if (clampedAngle < Math.PI) {
+    const clampedAngle = positiveModulo(newValue, d360);
+    if (clampedAngle < d180) {
       // The white part is on the left.
       /**
        * As clampedAngle moves from 0 to π, adjustedForSpeed moves from 0 to 1.
@@ -282,15 +300,57 @@ class Sphere {
   svg.appendChild(sphere.top);
 }
 
+// kinda toward you, up and to the left.
 async function overview2() {
+  type Settings = {
+    readonly yAngle: number;
+    readonly zAngle?: number;
+    readonly description: string;
+  };
+  type Opposites = readonly [Settings, Settings];
+  type Actions = readonly Opposites[];
+  const actions: Actions = [
+    [
+      { description: "toward you", yAngle: 0 },
+      { description: "away from you", yAngle: d180 },
+    ],
+    [
+      { description: "up", yAngle: d90, zAngle: -d90 },
+      { description: "down", yAngle: d90, zAngle: d90 },
+    ],
+    [
+      { description: "to your left", yAngle: d90, zAngle: d180 },
+      { description: "to your right", yAngle: d90, zAngle: 0 },
+    ],
+  ];
   const svg = getById("overview2svg", SVGSVGElement);
   const sphere = new Sphere();
   sphere.x = 0.5;
   sphere.y = 0.5;
-  sphere.yAngle = Math.PI / 2;
   svg.appendChild(sphere.top);
-  const descriptionDiv = getById("overview2text", HTMLDivElement);
-  descriptionDiv.innerText = "Orange side pointing to your right.";
+  const descriptionSpan = getById("overview2changingText", HTMLSpanElement);
+  while (true) {
+    const performed = new Array<Settings>();
+    for (const opposites of shuffleArray([...actions])) {
+      const settings = opposites[(Math.random() * 2) | 0];
+      sphere.yAngle = settings.yAngle;
+      if (typeof settings.zAngle == "number") {
+        sphere.zAngle = settings.zAngle;
+      }
+      descriptionSpan.innerText = settings.description;
+      // TODO animate the moves.
+      // Text changes to say "moving".
+      // If both from and to have undefined as the zAngle, then pick a random zAngle
+      //   and just animate the yAngle.
+      // If one has an undefined zAngle, the use the zAngle from the other,
+      //   and just animate the yAngle.  Make sure to go the fastest way.
+      // Else animate the change of the two angles at the same time.
+      //   Try rotating one of the zAngles, and updating the yAngle accordingly, to see if that makes for a faster path.
+      //   Make sure never to go the wrong way around a circle.
+      await sleep(2000);
+      performed.push(settings);
+    }
+  }
 }
 overview2();
 
@@ -307,19 +367,19 @@ const spheres = initializedArray(5, (index) => {
       sphere.diameter = 2;
       sphere.y = 2;
       sphere.x = 1;
-      sphere.yAngle = Math.PI / 4;
+      sphere.yAngle = d45;
       break;
     }
     case 1: {
       sphere.y = 1.5;
       sphere.x = 2.5;
-      sphere.yAngle = Math.PI / 2;
+      sphere.yAngle = d90;
       break;
     }
     case 2: {
       sphere.y = 2.5;
       sphere.x = 2.5;
-      sphere.yAngle = Math.PI / 2 + 0.01;
+      sphere.yAngle = d90 + 0.01;
       break;
     }
     case 3: {

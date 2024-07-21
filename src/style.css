@@ -111,7 +111,11 @@ g.sphere > circle {
   gap: 0.7em;
 }
 
-#overview2text {
+#overview2allText {
   width: 10ch;
   flex-grow: 1;
+}
+
+#overview2changingText {
+  text-decoration: underline;
 }

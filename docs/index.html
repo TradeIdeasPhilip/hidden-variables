@@ -7,8 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hidden Variables — My Solution</title>
     <!-- Do NOT include or reference CSS here.  See main.ts for the preferred way to include a css file. -->
-    <script type="module" crossorigin src="./assets/main-D3CsobQh.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/main-BAYwpWg3.css">
+    <script type="module" crossorigin src="./assets/main-DHliq6OP.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/main-DXQWOTcJ.css">
   </head>
   <body>
     <div id="main">
@@ -47,7 +47,10 @@
                 preserveAspectRatio="xMidYMid slice"
                 id="overview2svg"
               ></svg>
-              <div id="overview2text"></div>
+              <div id="overview2allText">
+                The orange side is pointing
+                <span id="overview2changingText"></span>.
+              </div>
             </div>
           </td>
         </tr>
@@ -56,16 +59,13 @@
           <td>
             <div class="stage-direction">
               Draw a sphere with two colors. Initially leave these colors in a
-              fixed position. Add a dot moving around the sphere. Show the
-              inputs as two numbers, tracking the dot. Constantly show the
-              output. Highlight that there are only two possible outputs. (I.e.
-              show them both on the screen and highlight which one is the
-              current measurement.) Initially title the result as “Would be:”.
-              Every once in a while it says “measuring”and “Is:” replaces “Would
-              Be:”. The dot stops moving. The colors move around a lot in a cool
-              and jerky movements. The color under the dot never changes. The
-              colors stop moving and after a brief pause, jump to the top of the
-              loop.
+              fixed position. Add an arrow moving around the edge of the sphere.
+              Constantly show the output. Initially title the result as “Would
+              be:”. Every once in a while it says “measuring” and “Is:” replaces
+              “Would Be:”. The dot stops moving. The colors move around a lot in
+              a cool and jerky movements. The color under the dot never changes.
+              The colors stop moving and after a brief pause, jump to the top of
+              the loop.
             </div>
           </td>
         </tr>

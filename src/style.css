@@ -139,3 +139,72 @@ g.sphere > circle {
     opacity: 100%;
   }
 }
+
+#overview3 {
+  width: 15em;
+  height: 5em;
+}
+
+[data-up-arrow] {
+  width: 0.6em;
+  height: 1em;
+  background-color: #ff7d00;
+  clip-path: polygon(
+    0.3em 0,
+    0 0.5em,
+    0.2em 0.5em,
+    0.2em 1em,
+    0.4em 1em,
+    0.4em 0.5em,
+    0.6em 0.5em
+  );
+}
+
+[data-down-arrow] {
+  width: 0.6em;
+  height: 1em;
+  background-color: #ff7d00;
+  clip-path: polygon(
+    0.3em 1em,
+    0 0.5em,
+    0.2em 0.5em,
+    0.2em 0em,
+    0.4em 0em,
+    0.4em 0.5em,
+    0.6em 0.5em
+  );
+}
+
+[data-left-arrow] {
+  width: 1em;
+  height: 1em;
+  background-color: #ff7d00;
+  clip-path: polygon(
+    0 0.5em,
+    0.5em 0.2em,
+    0.5em 0.4em,
+    1em 0.4em,
+    1em 0.6em,
+    0.5em 0.6em,
+    0.5em 0.8em
+  );
+}
+
+[data-right-arrow] {
+  width: 1em;
+  height: 1em;
+  background-color: #ff7d00;
+  clip-path: polygon(
+    1em 0.5em,
+    0.5em 0.2em,
+    0.5em 0.4em,
+    0em 0.4em,
+    0em 0.6em,
+    0.5em 0.6em,
+    0.5em 0.8em
+  );
+}
+
+[data-l]::after {
+  content: "&lt;";
+}

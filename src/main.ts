@@ -343,12 +343,28 @@ async function overview2() {
       { description: "<u>away</u> from you", yAngle: d180 },
     ],
     [
-      { description: "<u>up</u>", yAngle: d90, zAngle: -d90 },
-      { description: "<u>down</u>", yAngle: d90, zAngle: d90 },
+      {
+        description: "<u>up</u> <canvas data-up-arrow></canvas>",
+        yAngle: d90,
+        zAngle: -d90,
+      },
+      {
+        description: "<u>down</u> <canvas data-down-arrow></canvas>",
+        yAngle: d90,
+        zAngle: d90,
+      },
     ],
     [
-      { description: "to your <u>left</u>", yAngle: d90, zAngle: d180 },
-      { description: "to your <u>right</u>", yAngle: d90, zAngle: 0 },
+      {
+        description: "to your <u>left</u> <canvas data-left-arrow></canvas>",
+        yAngle: d90,
+        zAngle: d180,
+      },
+      {
+        description: "to your <u>right</u> <canvas data-right-arrow></canvas>",
+        yAngle: d90,
+        zAngle: 0,
+      },
     ],
   ];
   const svg = getById("overview2svg", SVGSVGElement);
@@ -466,6 +482,23 @@ async function overview2() {
   }
 }
 overview2();
+
+async function overview3() {
+  const svg = getById("overview3", SVGSVGElement);
+  const trianglePath = getById("overview3triangle", SVGPathElement);
+  const sphere = new Sphere();
+  sphere.x = 0.5;
+  sphere.y = 0.5;
+  svg.appendChild(sphere.top);
+  sphere.yAngle = d45;
+  new AnimationLoop((time) => {
+    const newAngle = positiveModulo(time / 480, d360);
+    sphere.zAngle = newAngle;
+    const color = newAngle > d90 && newAngle < 3 * d90 ? "white" : "#ff7d00";
+    trianglePath.style.fill = color;
+  });
+}
+overview3();
 
 ////////
 // Temporary test stuff

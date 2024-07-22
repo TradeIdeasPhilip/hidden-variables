@@ -307,25 +307,48 @@ class Sphere {
 }
 
 async function overview2() {
+  /**
+   * This describes what the screen should look like between animations.
+   *
+   * An animation will require a `Settings` object for the starting state,
+   * and a second for the ending state.
+   */
   type Settings = {
+    /**
+     * This rotation is done first.
+     */
     readonly yAngle: number;
+    /**
+     * This rotation is done second.
+     *
+     * If this is not specified, then it's a "don't care."
+     * The animations can chose a value that looks good and/or is easy to implement.
+     */
     readonly zAngle?: number;
+    /**
+     * HTML formatted.
+     */
     readonly description: string;
   };
   type Opposites = readonly [Settings, Settings];
   type Actions = readonly Opposites[];
+  // TODO some of these descriptions need some sort of arrow.  
+  // Using unicode characters caused small changes to the layout.
+  // I might be able to make the font smaller for the troubling characters,
+  // or I might draw arrows in a different way.
+  // 🫵 👆 → ▶
   const actions: Actions = [
     [
-      { description: "toward you", yAngle: 0 },
-      { description: "away from you", yAngle: d180 },
+      { description: "<u>toward you</u>", yAngle: 0 },
+      { description: "<u>away</u> from you", yAngle: d180 },
     ],
     [
-      { description: "up", yAngle: d90, zAngle: -d90 },
-      { description: "down", yAngle: d90, zAngle: d90 },
+      { description: "<u>up</u>", yAngle: d90, zAngle: -d90 },
+      { description: "<u>down</u>", yAngle: d90, zAngle: d90 },
     ],
     [
-      { description: "to your left", yAngle: d90, zAngle: d180 },
-      { description: "to your right", yAngle: d90, zAngle: 0 },
+      { description: "to your <u>left</u>", yAngle: d90, zAngle: d180 },
+      { description: "to your <u>right</u>", yAngle: d90, zAngle: 0 },
     ],
   ];
   const svg = getById("overview2svg", SVGSVGElement);
@@ -333,15 +356,15 @@ async function overview2() {
   sphere.x = 0.5;
   sphere.y = 0.5;
   svg.appendChild(sphere.top);
-  const descriptionSpan = getById("overview2changingText", HTMLSpanElement);
-  const descriptionDiv = getById("overview2allText", HTMLDivElement);
+  const descriptionDiv = getById("overview2text", HTMLDivElement);
 
-  async function animateChange(
-    from: Settings,
-    to: Settings,
-    durationMS: number
-  ) {
-    descriptionDiv.style.opacity = "0";
+  async function animateChange(from: Settings, to: Settings) {
+    /**
+     * If you change this, consider changing the time for the animation in style.css.
+     * `#overview2text .fade-in { animation: fade-in 2s; }`
+     */
+    const durationMS = 2000;
+    descriptionDiv.innerHTML = `The <span class="orange">orange</span> side is pointing <span class="fade-in">${to.description}</span>.`;
     const start = performance.now();
     const end = start + durationMS;
     const getYAngle = makeBoundedLinear(start, from.yAngle, end, to.yAngle);
@@ -376,9 +399,7 @@ async function overview2() {
     if (typeof to.zAngle == "number") {
       sphere.zAngle = to.zAngle;
     }
-    descriptionDiv.style.opacity = "";
-    descriptionSpan.innerText = to.description;
-    await sleep(1500);
+    await sleep(2500);
   }
 
   let previousSettings: Settings = { description: "", yAngle: 0 };
@@ -386,7 +407,7 @@ async function overview2() {
     const performed = new Array<Settings>();
     for (const opposites of shuffleArray([...actions])) {
       const settings = opposites[(Math.random() * 2) | 0];
-      await animateChange(previousSettings, settings, 500);
+      await animateChange(previousSettings, settings);
       performed.push(settings);
       previousSettings = settings;
     }
@@ -421,16 +442,12 @@ async function overview2() {
       return Math.random() * distance + min;
     }
     const settings: Settings = {
-      // TODO this is hard to read.
-      // Maybe underline each of the three sections, but not the "kinda", the comma, or the "and"
-      // Maybe add a longer pause.
-      description: `kinda ${performed[0].description}, ${performed[1].description} and ${performed[2].description}`,
+      description: `<i>kinda</i> ${performed[0].description}, ${performed[1].description} and ${performed[2].description}`,
       yAngle: rangedPaddedRandom(minYAngle, maxYAngle),
       zAngle: rangedPaddedRandom(minZAngle, maxZAngle),
     };
-    await animateChange(previousSettings, settings, 500);
+    await animateChange(previousSettings, settings);
     previousSettings = settings;
-    await sleep(1500);
   }
 }
 overview2();

@@ -111,11 +111,31 @@ g.sphere > circle {
   gap: 0.7em;
 }
 
-#overview2allText {
+#overview2text {
   width: 10ch;
   flex-grow: 1;
 }
 
-#overview2changingText {
-  text-decoration: underline;
+#overview2text .orange {
+  color: #ff7d00;
+  font-weight: bold;
+}
+
+#overview2text u {
+  font-weight: bold;
+  text-decoration-thickness: 0.125em;
+  text-decoration-color: #ff7d00;
+}
+
+#overview2text .fade-in {
+  animation: fade-in 2s;
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 100%;
+  }
 }

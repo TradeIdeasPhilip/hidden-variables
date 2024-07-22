@@ -332,7 +332,7 @@ async function overview2() {
   };
   type Opposites = readonly [Settings, Settings];
   type Actions = readonly Opposites[];
-  // TODO some of these descriptions need some sort of arrow.  
+  // TODO some of these descriptions need some sort of arrow.
   // Using unicode characters caused small changes to the layout.
   // I might be able to make the font smaller for the troubling characters,
   // or I might draw arrows in a different way.
@@ -399,7 +399,7 @@ async function overview2() {
     if (typeof to.zAngle == "number") {
       sphere.zAngle = to.zAngle;
     }
-    await sleep(2500);
+    await sleep(1000);
   }
 
   let previousSettings: Settings = { description: "", yAngle: 0 };
@@ -433,6 +433,8 @@ async function overview2() {
         throw new Error("");
       }
     }
+    // Add some padding so it doesn't say "right" or "up" or "toward" when it is very close to the line.
+    // The padding makes sure it's never close to the line.
     function rangedPaddedRandom(min: number, max: number) {
       let distance = max - min;
       const padding = distance * 0.2;
@@ -441,9 +443,22 @@ async function overview2() {
       distance = max - min;
       return Math.random() * distance + min;
     }
+    // Similar to above but weighted to make it more visible.
+    function weightedPaddedRandom(min: number, max: number) {
+      //
+      function paddingFor(angle: number) {
+        return makeBoundedLinear(0, 0.2, d90, 0.4)(Math.abs(angle - d90));
+      }
+      let distance = max - min;
+      min += paddingFor(min) * distance;
+      max -= paddingFor(max) * distance;
+      distance = max - min;
+      const result = Math.random() * distance + min;
+      return result;
+    }
     const settings: Settings = {
       description: `<i>kinda</i> ${performed[0].description}, ${performed[1].description} and ${performed[2].description}`,
-      yAngle: rangedPaddedRandom(minYAngle, maxYAngle),
+      yAngle: weightedPaddedRandom(minYAngle, maxYAngle),
       zAngle: rangedPaddedRandom(minZAngle, maxZAngle),
     };
     await animateChange(previousSettings, settings);

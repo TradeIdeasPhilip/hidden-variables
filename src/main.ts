@@ -35,24 +35,74 @@ const d90 = d180 / 2;
  */
 const d45 = d90 / 2;
 
+// VIDEO:  
+// This is a simpler version of my MathToPath code.
+// https://github.com/TradeIdeasPhilip/random-svg-tests/blob/master/src/math-to-path.ts
+// That deserves its own video. 
+// Usually I let MathToPath estimate a function's derivate.
+// Because a circle is so simple, I can calculus it myself. 🤓
+//
+// I need to clean MathToPath up and put it in a library.
+// It's very convenient.  
+/** 
+ * This function creates an _ideal_ circle.
+ * Consider using the `CIRCLE` constant because there is only one _ideal_ circle.
+ * 
+ * More documentation at `CIRCLE`
+ * @param numberOfSegments How many quadratic Bézier segments to use to create the circle.
+ * @returns A description of a set of Bézier segments appropriate for drawing a circle.
+ */
 function makeCircle(numberOfSegments: number) {
   if (numberOfSegments % 4 == 0) {
     // There's a weird bug.  If a segment is almost perfectly vertical, it causes problems.
     // TODO find and fix the bug.
     throw new Error("TODO");
   }
+  /**
+   * Record the position and derivative of the function at various times.
+   */
   const samples = initializedArray(numberOfSegments + 1, (index) => {
+    /**
+     * The time associated with this sample.
+     * A value between 0 and 1, inclusive.
+     */
     const t = index / numberOfSegments;
+    /**
+     * The angle of the segment from the center of the circle to the current point.
+     * 
+     * Note that the path starts at the top of the circle and makes one complete loop around.
+     * It goes counterclockwise.
+     * 
+     * Don't forget:  In math class, positive y means up.
+     * In SVG, positive y means down.
+     * Angles also have to be negated.
+     */
     const θ = 3 * d90 - t * d360;
     const point: Point = polarToRectangular(0.5, θ);
+    /**
+     * The "derivative" of the function.
+     * (It might be vertical.)
+     */
     const direction = θ - d90;
+    /**
+     * The sample at time t.
+     */
     return { t, point, direction };
   });
+  /**
+   * Each segment requires two samples, one for each end.
+   * A circle is be smooth and continuous.
+   * So the sample for the end of one segment is reused for the start of the next segment.
+   */
   const segments = initializedArray(numberOfSegments, (index) => ({
     from: samples[index],
     to: samples[index + 1],
   }));
-  let result = segments.map((segment) => {
+  const result = segments.map((segment) => {
+    /**
+     * This is the common way to specify a Bézier curve:
+     * A single control point replaces two vectors.
+     */
     const controlPoint = findIntersection(
       {
         x0: segment.from.point.x,
@@ -66,15 +116,32 @@ function makeCircle(numberOfSegments: number) {
       }
     );
     if (!controlPoint) {
+      // We actually have to deal with this for some shapes.
+      // But a circle is too simple to fail.
       throw new Error("wtf");
     }
     return { controlPoint, segment };
   });
   return result;
 }
+// VIDEO:
+// At one point I had to 
+/**
+ * This is an approximation of a circle shape.
+ * 
+ * SVG contains more direct ways to draw a circle or ellipse.
+ * I find those cumbersome, especially in this application.
+ * 
+ * This circle is always centered on the origin, 1 unit in diameter, and perfectly round.
+ * All other circles and squashed circles are based on this archetype.
+ */
 const CIRCLE = makeCircle(10);
 (window as any).CIRCLE = CIRCLE;
 
+/**
+ * This provides a way to display a sphere with one hemisphere one color and the other hemisphere another color.
+ * This manipulates a number of SVG elements and properties to allow you to rotate the sphere into any position.
+ */
 class Sphere {
   /**
    * I was having trouble with numbers very close to 0.  SVG should be able to read scientific notation,
@@ -103,10 +170,32 @@ class Sphere {
     if (b < 0 || b > 1 || !isFinite(b)) {
       throw new Error("wtf");
     }
+    /** 
+     * How much to squash the left part of the circle.
+     * The input is 0 to 1, as described below.
+     * 
+     * `left` is a ratio which says how much to squash the left side of our ideal circle.
+     * 1 means leave it alone.
+     * 0 means flatten it into a vertical line segment through the origin.
+     * -1 means to flip it across the y-axis to look like the right side of an ideal circle.
+     */
     const left = makeLinear(0, 1, 1, -1);
+    /** 
+     * How much to squash the right part of the circle.
+     * The input is 0 to 1, as described below.
+     * 
+     * `right` is a ratio which says how much to squash the right side of our ideal circle.
+     * 1 means leave it alone.
+     * 0 means flatten it into a vertical line segment through the origin.
+     * -1 means to flip it across the y-axis to look like the left side of an ideal circle.
+     */
     const right = makeLinear(1, 1, 0, -1);
-    return this.squashedCircle(left(a), right(b), "real");
+    return this.squashedCircle(left(a), right(b), "real");    
   }
+  // VIDEO:
+  // This is the heart of the rotation around the y-axis.
+  // Notice the documentation comment about `A`.
+  // Notice the "real" code that spits out SVG 
   /**
    * This draws a circle.  The left and right halves can be scaled separately.  The top and bottom points
    * of the circle are fixed.
@@ -207,6 +296,9 @@ class Sphere {
     }
   }
   readonly #top = document.createElementNS("http://www.w3.org/2000/svg", "g");
+  /**
+   * The top level element.  Place this element on the SVG to display this sphere.
+   */
   get top() {
     return this.#top;
   }
@@ -264,10 +356,22 @@ class Sphere {
   get zAngle() {
     return this.#zAngle;
   }
+  /**
+   * This transformation is done _after_ the `yAngle`.
+   * This does nothing noticeable if `yAngle` in an integer multiple of π.
+   * 
+   * This is in radians.
+   * This uses the SVG convention, not what you learned in algebra and trig
+   * classes, so positive values are clockwise.
+   */
   set zAngle(newValue) {
     this.#white.style.transform = `rotate(${newValue}rad)`;
   }
   #x = 0;
+  /**
+   * The center of the sphere.
+   * Defaults to 0.
+   */
   get x() {
     return this.#x;
   }
@@ -276,6 +380,10 @@ class Sphere {
     this.#top.style.setProperty("--x", newValue + "px");
   }
   #y = 0;
+  /**
+   * The center of the sphere.
+   * Defaults to 0.
+   */
   get y() {
     return this.#y;
   }
@@ -284,6 +392,9 @@ class Sphere {
     this.#top.style.setProperty("--y", newValue + "px");
   }
   #diameter = 1;
+  /**
+   * Defaults to 1.
+   */
   get diameter() {
     return this.#diameter;
   }
@@ -291,6 +402,16 @@ class Sphere {
     this.#diameter = newValue;
     this.#top.style.setProperty("--diameter", newValue.toString());
   }
+  /**
+   * This allows you to set the left and right sides of the white area to anything you want.
+   * 
+   * This is public only for debug and development access.
+   * In normal operations you should set `this.y` which will call this.
+   * @param a Where to draw the down stroke
+   * @param b Where to draw the return stroke.
+   * @returns Debug info.  Likely to change in the future.
+   * This is the SVG path string.
+   */
   updateWhite(a: number, b: number) {
     const d = Sphere.createHighlight(a, b);
     this.#white.setAttribute("d", d);
@@ -330,13 +451,14 @@ async function overview2() {
      */
     readonly description: string;
   };
+  /**
+   * Either go up or down.  Either go left or right.  Either go forward or back.
+   */
   type Opposites = readonly [Settings, Settings];
+  /**
+   * These are the 6 cardinal directions.
+   */
   type Actions = readonly Opposites[];
-  // TODO some of these descriptions need some sort of arrow.
-  // Using unicode characters caused small changes to the layout.
-  // I might be able to make the font smaller for the troubling characters,
-  // or I might draw arrows in a different way.
-  // 🫵 👆 → ▶
   const actions: Actions = [
     [
       { description: "<u>toward you</u>", yAngle: 0 },
@@ -418,6 +540,9 @@ async function overview2() {
     await sleep(1000);
   }
 
+  /**
+   * This is the value between iterations of this loop.
+   */
   let previousSettings: Settings = { description: "", yAngle: 0 };
   while (true) {
     const performed = new Array<Settings>();

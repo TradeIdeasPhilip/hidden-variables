@@ -11,6 +11,7 @@ import {
   shuffleArray,
 } from "./utility";
 import {
+  assertClass,
   initializedArray,
   LinearFunction,
   makeBoundedLinear,
@@ -35,19 +36,19 @@ const d90 = d180 / 2;
  */
 const d45 = d90 / 2;
 
-// VIDEO:  
+// VIDEO:
 // This is a simpler version of my MathToPath code.
 // https://github.com/TradeIdeasPhilip/random-svg-tests/blob/master/src/math-to-path.ts
-// That deserves its own video. 
+// That deserves its own video.
 // Usually I let MathToPath estimate a function's derivate.
 // Because a circle is so simple, I can calculus it myself. 🤓
 //
 // I need to clean MathToPath up and put it in a library.
-// It's very convenient.  
-/** 
+// It's very convenient.
+/**
  * This function creates an _ideal_ circle.
  * Consider using the `CIRCLE` constant because there is only one _ideal_ circle.
- * 
+ *
  * More documentation at `CIRCLE`
  * @param numberOfSegments How many quadratic Bézier segments to use to create the circle.
  * @returns A description of a set of Bézier segments appropriate for drawing a circle.
@@ -69,10 +70,10 @@ function makeCircle(numberOfSegments: number) {
     const t = index / numberOfSegments;
     /**
      * The angle of the segment from the center of the circle to the current point.
-     * 
+     *
      * Note that the path starts at the top of the circle and makes one complete loop around.
      * It goes counterclockwise.
-     * 
+     *
      * Don't forget:  In math class, positive y means up.
      * In SVG, positive y means down.
      * Angles also have to be negated.
@@ -125,13 +126,13 @@ function makeCircle(numberOfSegments: number) {
   return result;
 }
 // VIDEO:
-// At one point I had to 
+// At one point I had to
 /**
  * This is an approximation of a circle shape.
- * 
+ *
  * SVG contains more direct ways to draw a circle or ellipse.
  * I find those cumbersome, especially in this application.
- * 
+ *
  * This circle is always centered on the origin, 1 unit in diameter, and perfectly round.
  * All other circles and squashed circles are based on this archetype.
  */
@@ -143,6 +144,36 @@ const CIRCLE = makeCircle(10);
  * This manipulates a number of SVG elements and properties to allow you to rotate the sphere into any position.
  */
 class Sphere {
+  randomizeDirection(): void {
+    // TODO This should create a uniform distribution.  To match all of the text!!
+    this.yAngle = Math.random() * d360 - d180;
+    this.zAngle = Math.random() * d360 - d180;
+  }
+  async randomizeDirectionAndAnimate(durationMS: number) {
+    const startTime = performance.now();
+    const endTime = startTime + durationMS;
+    const values = (["yAngle", "zAngle"] as const).map((property) => {
+      const previousAngle = this[property];
+      const extraRotations = ((Math.random() * 5) | 0) - 2;
+      const newAngle = Math.random() * d360 - d180;
+      const newAnimatedAngle = newAngle + extraRotations * d360;
+      const getAngle = makeBoundedLinear(
+        startTime,
+        previousAngle,
+        endTime,
+        newAnimatedAngle
+      );
+      const animationLoop = new AnimationLoop((timestamp) => {
+        this[property] = getAngle(timestamp);
+      });
+      return { property, animationLoop, newAngle };
+    });
+    await sleep(durationMS);
+    values.forEach(({ property, animationLoop, newAngle }) => {
+      animationLoop.cancel();
+      this[property] = newAngle;
+    });
+  }
   /**
    * I was having trouble with numbers very close to 0.  SVG should be able to read scientific notation,
    * but I was seeing problems and I each time I fixed the problem by replacing something like "1.23456e-20"
@@ -170,32 +201,32 @@ class Sphere {
     if (b < 0 || b > 1 || !isFinite(b)) {
       throw new Error("wtf");
     }
-    /** 
+    /**
      * How much to squash the left part of the circle.
      * The input is 0 to 1, as described below.
-     * 
+     *
      * `left` is a ratio which says how much to squash the left side of our ideal circle.
      * 1 means leave it alone.
      * 0 means flatten it into a vertical line segment through the origin.
      * -1 means to flip it across the y-axis to look like the right side of an ideal circle.
      */
     const left = makeLinear(0, 1, 1, -1);
-    /** 
+    /**
      * How much to squash the right part of the circle.
      * The input is 0 to 1, as described below.
-     * 
+     *
      * `right` is a ratio which says how much to squash the right side of our ideal circle.
      * 1 means leave it alone.
      * 0 means flatten it into a vertical line segment through the origin.
      * -1 means to flip it across the y-axis to look like the left side of an ideal circle.
      */
     const right = makeLinear(1, 1, 0, -1);
-    return this.squashedCircle(left(a), right(b), "real");    
+    return this.squashedCircle(left(a), right(b), "real");
   }
   // VIDEO:
   // This is the heart of the rotation around the y-axis.
   // Notice the documentation comment about `A`.
-  // Notice the "real" code that spits out SVG 
+  // Notice the "real" code that spits out SVG
   /**
    * This draws a circle.  The left and right halves can be scaled separately.  The top and bottom points
    * of the circle are fixed.
@@ -314,6 +345,9 @@ class Sphere {
     "http://www.w3.org/2000/svg",
     "circle"
   );
+  get listener(): SVGElement {
+    return this.#lightAndShadow;
+  }
   constructor() {
     this.#top.append(this.#orange, this.#white, this.#lightAndShadow);
     this.#top.classList.add("sphere");
@@ -359,7 +393,7 @@ class Sphere {
   /**
    * This transformation is done _after_ the `yAngle`.
    * This does nothing noticeable if `yAngle` in an integer multiple of π.
-   * 
+   *
    * This is in radians.
    * This uses the SVG convention, not what you learned in algebra and trig
    * classes, so positive values are clockwise.
@@ -404,7 +438,7 @@ class Sphere {
   }
   /**
    * This allows you to set the left and right sides of the white area to anything you want.
-   * 
+   *
    * This is public only for debug and development access.
    * In normal operations you should set `this.y` which will call this.
    * @param a Where to draw the down stroke
@@ -703,6 +737,37 @@ new AnimationLoop((timestamp) => {
   fakeCirclePath.style.strokeLinecap = "round";
   testSvg.appendChild(fakeCirclePath);
 }
+
+async function randomize() {
+  const arrowArchetypePolygon = getById("arrow-archetype", SVGPolygonElement);
+  arrowArchetypePolygon.id = "";
+  const secondArrow = assertClass(
+    arrowArchetypePolygon.cloneNode(true),
+    SVGPolygonElement
+  );
+  secondArrow.style.fill = "transparent";
+  testSvg.appendChild(secondArrow);
+  const sphere = new Sphere();
+  sphere.x = 1.5;
+  sphere.y = 3.5;
+  testSvg.appendChild(sphere.top);
+  const baseTransform = secondArrow.style.transform;
+  const getHue = makeLinear(0, 30, d180, 130);
+  sphere.listener.addEventListener("mousemove", (event) => {
+    const x = event.clientX;
+    const bounds = sphere.listener.getBoundingClientRect();
+    const position = ((x - bounds.left) / bounds.width) * 2 - 1;
+    const angle = Math.acos(Math.min(1, Math.max(-1, position)));
+    secondArrow.style.transform = `${baseTransform} rotate(${angle}rad)`;
+    secondArrow.style.fill = `lch(60 131.21 ${getHue(angle)})`;
+    console.log(position, angle);
+  });
+  while (true) {
+    await sphere.randomizeDirectionAndAnimate(750);
+    await sleep(1667);
+  }
+}
+randomize();
 
 // TODO fix this:
 // The white never properly covers the orange right.

@@ -7,8 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hidden Variables — My Solution</title>
     <!-- Do NOT include or reference CSS here.  See main.ts for the preferred way to include a css file. -->
-    <script type="module" crossorigin src="./assets/main-BZos9G9T.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/main-CBYrwWgM.css">
+    <script type="module" crossorigin src="./assets/main-Do78--Vm.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/main-7WQMYqge.css">
   </head>
   <body>
     <div id="main">
@@ -22,6 +22,10 @@
       <p>
         My solution to hidden variables, spooky action at a distance, Bell's
         inequality, etc.
+      </p>
+      <p>
+        I am proposing a fairly simple model of a hidden variable. This removes
+        the need for “spooky action at a distance.”
       </p>
       <h1>Overview</h1>
       <p>This model contains only three things.</p>
@@ -48,8 +52,8 @@
                 id="overview2svg"
               ></svg>
               <div id="overview2text">
-                The orange side is pointing
-                <span id="overview2changingText"></span>.
+                The orange side is pointing… [This entire DIV will be
+                overwritten].
               </div>
             </div>
           </td>
@@ -91,8 +95,13 @@
       <p>
         You can control the direction the measurement equipment is pointing. You
         can describe these with two numbers, analogous to longitude and
-        latitude. I display that direction as a dot on the surface of the
-        sphere.
+        latitude.
+      </p>
+      <p>
+        For simplicity I always place the measuring device flat on the screen. I
+        will only measures points on the edge of the sphere. I can still measure
+        any two points that I choose. I might have to rotate the particle,
+        instead of the detector. That's an insignificant detail.
       </p>
       <p>
         The output of the measurement is a single value. In this representation
@@ -104,22 +113,22 @@
       <p>This is my take. I have not seen this anywhere else.</p>
       <p>
         When we talk about a quantum property like spin or polarization, I
-        represent that as a direction: Which way is the red side pointing? You
-        can describe this as two numbers, the latitude and the longitude of the
-        center of the red hemisphere.
+        represent that as a direction: Which way is the orange side pointing?
+        You can describe this as two numbers, the latitude and the longitude of
+        the center of the orange hemisphere.
       </p>
       <p>
         When you make a measurement, two things happen. The first part is
-        completely deterministic. If the measurement apparatus is point anywhere
-        in the red area, the result of the measurement will be red. Otherwise
-        the result will be blue.
+        completely deterministic. If the measurement apparatus is pointing
+        anywhere in the orange area, the result of the result will be orange.
+        Otherwise the result will be white.
       </p>
       <p>
-        The second step is to randomize the direction of the red part. The
+        The second step is to randomize the direction of the orange part. The
         resulting position will <u>not</u> change the result if the exact same
-        test is repeated. I.e. only half the possible orientations are legal.
-        Otherwise we cannot prediction the exact orientation after the
-        measurement, so I will call it <i>random</i>.
+        test is repeated. I.e. only half the possible directions are legal.
+        Aside from that it is impossible to predict the exact direction after
+        the measurement, so I will call the new direction <i>random</i>.
       </p>
       <p>
         This is how my version of a hidden variable differs from the versions

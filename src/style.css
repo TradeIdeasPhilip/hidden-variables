@@ -116,7 +116,7 @@ g.sphere > circle {
   flex-grow: 1;
 }
 
-#overview2text .orange {
+span.orange {
   color: #ff7d00;
   font-weight: bold;
 }

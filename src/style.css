@@ -13,7 +13,7 @@ body {
 }
 
 #main {
-  max-width: 100ch;
+  max-width: 90ch;
   display: flex;
   flex-direction: column;
   margin-left: 2em;
@@ -41,7 +41,7 @@ p {
   text-align: justify;
   margin-top: 0.4em;
   margin-bottom: 0.4em;
-  text-indent: 0.5em;
+  text-indent: 2.5ch;
 }
 
 h1 + p {

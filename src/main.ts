@@ -453,6 +453,28 @@ class Sphere {
   }
 }
 
+class Detector {
+  readonly #group = document.createElementNS("http://www.w3.org/2000/svg", "")
+  constructor(public readonly sphere : Sphere) {
+//
+  }
+  update() {
+    //
+  }
+  private setColor(newValue : "orange"|"white") {
+    //
+  }
+  #direction = 0;
+  get direction() {
+    return this.#direction;
+  }
+  set direction(newValue : number) {
+    this.#direction = newValue;
+    //
+    this.update();
+  }
+}
+
 {
   const svg = getById("overview1", SVGSVGElement);
   const sphere = new Sphere();
@@ -739,13 +761,12 @@ new AnimationLoop((timestamp) => {
 }
 
 async function randomize() {
-  const arrowArchetypePolygon = getById("arrow-archetype", SVGPolygonElement);
-  arrowArchetypePolygon.id = "";
+  const arrowArchetypeG = getById("arrow-archetype", SVGGElement);
+  arrowArchetypeG.id = "";
   const secondArrow = assertClass(
-    arrowArchetypePolygon.cloneNode(true),
-    SVGPolygonElement
+    arrowArchetypeG.cloneNode(true),
+    SVGGElement
   );
-  secondArrow.style.fill = "transparent";
   testSvg.appendChild(secondArrow);
   const sphere = new Sphere();
   sphere.x = 1.5;

@@ -7,8 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hidden Variables — My Solution</title>
     <!-- Do NOT include or reference CSS here.  See main.ts for the preferred way to include a css file. -->
-    <script type="module" crossorigin src="./assets/main-Do78--Vm.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/main-7WQMYqge.css">
+    <script type="module" crossorigin src="./assets/main-pkpkkbNa.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/main-PETuQ0gJ.css">
   </head>
   <body>
     <div id="main">
@@ -91,7 +91,11 @@
         particle.
       </p>
       <h1>Measurement</h1>
-      <p>These are the standard measurements.</p>
+      <p>
+        These are the standard measurements. I have <i>not</i> performed any new
+        experiments. I am adding a new interpretation to well known
+        measurements.
+      </p>
       <p>
         You can control the direction the measurement equipment is pointing. You
         can describe these with two numbers, analogous to longitude and
@@ -120,8 +124,8 @@
       <p>
         When you make a measurement, two things happen. The first part is
         completely deterministic. If the measurement apparatus is pointing
-        anywhere in the orange area, the result of the result will be orange.
-        Otherwise the result will be white.
+        anywhere in the orange area, the result will be orange. Otherwise the
+        result will be white.
       </p>
       <p>
         The second step is to randomize the direction of the orange part. The
@@ -132,17 +136,13 @@
       </p>
       <p>
         This is how my version of a hidden variable differs from the versions
-        I've seen. Note that my measurement step is always deterministic. There
-        is randomness at the end of my measurement, but the random value will
-        not be used until the next measurement.
+        I've seen. My measurement step is always deterministic. There is
+        randomness at the end of my measurement, but the random value will not
+        be used until the next measurement.
       </p>
       <h1>Example: Single Particle</h1>
       <div class="stage-direction">
         Measure it once then rotate n° and measure it again.
-      </div>
-      <h1>Example: Three in a Row</h1>
-      <div class="stage-direction">
-        Three filters in a row, like 3 sheets of polarized film.
       </div>
       <h1>Example: Entangled Particles</h1>
       <div class="stage-direction">
@@ -151,6 +151,34 @@
         will always point straight down. The other will spin around to a random
         place, but still on the outside of the circle. Measure both. Keep tables
         keeping track of the results. Repeat animation forever.
+      </div>
+      <h1>Example: Three in a Row</h1>
+      <div class="stage-direction">
+        I think I can use a very similar model for polarized light.
+        <br />
+        <br />
+        Add an animation showing a photon going through multiple sheets of
+        polarized film. Show one photon at a time. Keep score on the screen.
+        Allow the user to adjust the rotations.
+        <br />
+        <br />
+        This should work very similar to the entangled particles, but I will
+        need to tweak a couple of things. In this case I need a period of 180°.
+        If the center of the orange side is pointing in a specific direction, or
+        the center of the white side is pointing in that direction, I need to
+        treat those cases identically. In the previous two examples, those two
+        cases were exact opposites.
+        <br />
+        <br />
+        In fact, the half orange / half white spheres probably need to change. I
+        can imagine a circle with a stripe through the middle. The direction of
+        the stripe corresponds to the direction of the polarization. And the
+        180° symmetry will be obvious.
+        <br />
+        <br />
+        There isn't any need for a 3d object, like a sphere. We only have 1
+        degree of freedom in this example. Light can't be polarized in the same
+        direction that it moves!
       </div>
       <h1>Testing / Samples / Notes / Temp</h1>
       <p>Call <code>doIt()</code> each time.</p>
@@ -206,17 +234,17 @@
           </radialGradient>
         </defs>
         <circle cx="0.5" cy="0.5" r="0.5" fill="#ff7d00" stroke="none"></circle>
-        <polygon
-          id="arrow-archetype"
-          style="transform: translate(1.5px, 3.5px)"
-          points="0.5 0 ,
-        0.6 -0.06,
-        0.6 -0.02,
-        0.7 -0.02,
-        0.7 0.02,
-        0.6 0.02,
-        0.6 0.06"
-        ></polygon>
+        <g id="arrow-archetype" style="transform: translate(1.5px, 3.5px)">
+          <polygon
+            points="0.5 0,  0.6 -0.06,  0.6 -0.02,  0.77 -0.02,  0.77 0.02,  0.6 0.02,  0.6 0.06"
+          ></polygon>
+          <circle
+            style="stroke-width: 0.03; stroke: black; fill: #ff7d00"
+            cx="0.77"
+            cy="0"
+            r="0.07"
+          ></circle>
+        </g>
       </svg>
     </div>
   </body>

@@ -32,7 +32,7 @@ const d360 = 2 * d180;
  */
 const d90 = d180 / 2;
 /**
- * 45° (right angle)
+ * 45°
  */
 const d45 = d90 / 2;
 
@@ -454,26 +454,30 @@ class Sphere {
 }
 
 class Detector {
-  readonly #group = document.createElementNS("http://www.w3.org/2000/svg", "")
-  constructor(public readonly sphere : Sphere) {
-//
-  }
-  update() {
+  readonly #group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+  constructor(public readonly sphere: Sphere) {
     //
   }
-  private setColor(newValue : "orange"|"white") {
+  update() {
+    this.setColor;
+    this.#group;
+    Detector;
+    //
+  }
+  private setColor(_newValue: "orange" | "white") {
     //
   }
   #direction = 0;
   get direction() {
     return this.#direction;
   }
-  set direction(newValue : number) {
+  set direction(newValue: number) {
     this.#direction = newValue;
     //
     this.update();
   }
 }
+Detector;
 
 {
   const svg = getById("overview1", SVGSVGElement);
@@ -763,10 +767,7 @@ new AnimationLoop((timestamp) => {
 async function randomize() {
   const arrowArchetypeG = getById("arrow-archetype", SVGGElement);
   arrowArchetypeG.id = "";
-  const secondArrow = assertClass(
-    arrowArchetypeG.cloneNode(true),
-    SVGGElement
-  );
+  const secondArrow = assertClass(arrowArchetypeG.cloneNode(true), SVGGElement);
   testSvg.appendChild(secondArrow);
   const sphere = new Sphere();
   sphere.x = 1.5;

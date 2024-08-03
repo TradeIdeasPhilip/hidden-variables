@@ -143,10 +143,6 @@
       <div class="stage-direction">
         Measure it once then rotate n° and measure it again.
       </div>
-      <h1>Example: Three in a Row</h1>
-      <div class="stage-direction">
-        Three filters in a row, like 3 sheets of polarized film.
-      </div>
       <h1>Example: Entangled Particles</h1>
       <div class="stage-direction">
         Create 2 particles with random but opposite hidden variables. Show them
@@ -154,6 +150,34 @@
         will always point straight down. The other will spin around to a random
         place, but still on the outside of the circle. Measure both. Keep tables
         keeping track of the results. Repeat animation forever.
+      </div>
+      <h1>Example: Three in a Row</h1>
+      <div class="stage-direction">
+        I think I can use a very similar model for polarized light.
+        <br />
+        <br />
+        Add an animation showing a photon going through multiple sheets of
+        polarized film. Show one photon at a time. Keep score on the screen.
+        Allow the user to adjust the rotations.
+        <br />
+        <br />
+        This should work very similar to the entangled particles, but I will
+        need to tweak a couple of things. In this case I need a period of 180°.
+        If the center of the orange side is pointing in a specific direction, or
+        the center of the white side is pointing in that direction, I need to
+        treat those cases identically. In the previous two examples, those two
+        cases were exact opposites.
+        <br />
+        <br />
+        In fact, the half orange / half white spheres probably need to change. I
+        can imagine a circle with a stripe through the middle. The direction of
+        the stripe corresponds to the direction of the polarization. And the
+        180° symmetry will be obvious.
+        <br />
+        <br />
+        There isn't any need for a 3d object, like a sphere. We only have 1
+        degree of freedom in this example. Light can't be polarized in the same
+        direction that it moves!
       </div>
       <h1>Testing / Samples / Notes / Temp</h1>
       <p>Call <code>doIt()</code> each time.</p>
@@ -211,13 +235,7 @@
         <circle cx="0.5" cy="0.5" r="0.5" fill="#ff7d00" stroke="none"></circle>
         <g id="arrow-archetype" style="transform: translate(1.5px, 3.5px)">
           <polygon
-            points="0.5 0 ,
-        0.6 -0.06,
-        0.6 -0.02,
-        0.77 -0.02,
-        0.77 0.02,
-        0.6 0.02,
-        0.6 0.06"
+            points="0.5 0,  0.6 -0.06,  0.6 -0.02,  0.77 -0.02,  0.77 0.02,  0.6 0.02,  0.6 0.06"
           ></polygon>
           <circle
             style="stroke-width: 0.03; stroke: black; fill: #ff7d00"

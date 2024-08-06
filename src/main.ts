@@ -11,7 +11,6 @@ import {
   shuffleArray,
 } from "./utility";
 import {
-  assertClass,
   initializedArray,
   LinearFunction,
   makeBoundedLinear,
@@ -489,20 +488,11 @@ class Sphere {
         this.#zAngle + (flipped ? d180 : 0),
         d360
       );
-      const debug = {
-        flipped,
-        orangeStart,
-        yAngle: this.#yAngle,
-        zAngle: this.#zAngle,
-        detectors: new Array<unknown>(),
-      };
       detectors.forEach((detector) => {
         const position = positiveModulo(  orangeStart-detector.direction +d90, d360);
         const resultIsOrange = position < d180;
         detector.orange = resultIsOrange;
-        debug.detectors.push({ position, resultIsOrange, detector });
       });
-      console.log(debug);
     }
   }
 }
@@ -837,32 +827,26 @@ new AnimationLoop((timestamp) => {
   testSvg.appendChild(fakeCirclePath);
 }
 
-async function randomize() {
-  const arrowArchetypeG = getById("arrow-archetype", SVGGElement);
-  arrowArchetypeG.id = "";
-  const secondArrow = assertClass(arrowArchetypeG.cloneNode(true), SVGGElement);
-  testSvg.appendChild(secondArrow);
+async function randomizeSphereWithTwoDetectors() {
   const sphere = new Sphere();
   sphere.x = 1.5;
   sphere.y = 3.5;
   testSvg.appendChild(sphere.top);
-  const baseTransform = secondArrow.style.transform;
-  const getHue = makeLinear(0, 30, d180, 130);
+  sphere.addDetector();
+  const movableArrow = sphere.addDetector(Math.PI);
   sphere.listener.addEventListener("mousemove", (event) => {
     const x = event.clientX;
     const bounds = sphere.listener.getBoundingClientRect();
     const position = ((x - bounds.left) / bounds.width) * 2 - 1;
     const angle = Math.acos(Math.min(1, Math.max(-1, position)));
-    secondArrow.style.transform = `${baseTransform} rotate(${angle}rad)`;
-    secondArrow.style.fill = `lch(60 131.21 ${getHue(angle)})`;
-    console.log(position, angle);
+    movableArrow.direction = angle;
   });
   while (true) {
     await sphere.randomizeDirectionAndAnimate(750);
     await sleep(1667);
   }
 }
-randomize();
+randomizeSphereWithTwoDetectors();
 
 // TODO fix this:
 // The white never properly covers the orange right.

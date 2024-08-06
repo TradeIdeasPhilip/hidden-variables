@@ -385,6 +385,8 @@ class Sphere {
       const left = (1 + Math.cos(clampedAngle)) / 2;
       this.updateWhite(left, 1);
     }
+    this.#yAngle = newValue;
+    this.updateDetectors(...this.#detectors);
   }
   #zAngle = 0;
   get zAngle() {
@@ -400,6 +402,8 @@ class Sphere {
    */
   set zAngle(newValue) {
     this.#white.style.transform = `rotate(${newValue}rad)`;
+    this.#zAngle = newValue;
+    this.updateDetectors(...this.#detectors);
   }
   #x = 0;
   /**
@@ -439,45 +443,114 @@ class Sphere {
   /**
    * This allows you to set the left and right sides of the white area to anything you want.
    *
-   * This is public only for debug and development access.
    * In normal operations you should set `this.y` which will call this.
    * @param a Where to draw the down stroke
    * @param b Where to draw the return stroke.
    * @returns Debug info.  Likely to change in the future.
    * This is the SVG path string.
    */
-  updateWhite(a: number, b: number) {
+  private updateWhite(a: number, b: number) {
     const d = Sphere.createHighlight(a, b);
     this.#white.setAttribute("d", d);
     return d; // for debugging, not production
   }
+  readonly #detectors: Detector[] = [];
+  /**
+   *
+   * @param initialDirection In radians.
+   */
+  addDetector(initialDirection: number = 0): {
+    direction: number;
+    readonly orange: boolean;
+  } {
+    const detector = new Detector(this.top);
+    this.#detectors.push(detector);
+    detector.direction = initialDirection;
+    const updateDetectors = this.updateDetectors.bind(this);
+    updateDetectors(detector);
+    const accessor = {
+      get direction() {
+        return detector.direction;
+      },
+      set direction(newValue) {
+        detector.direction = newValue;
+        updateDetectors(detector);
+      },
+      get orange() {
+        return detector.orange;
+      },
+    };
+    return accessor;
+  }
+  private updateDetectors(...detectors: Detector[]) {
+    if (detectors.length > 0) {
+      const flipped = positiveModulo(this.#yAngle, d360) > d180;
+      const orangeStart = positiveModulo(
+        this.#zAngle + (flipped ? d180 : 0),
+        d360
+      );
+      const debug = {
+        flipped,
+        orangeStart,
+        yAngle: this.#yAngle,
+        zAngle: this.#zAngle,
+        detectors: new Array<unknown>(),
+      };
+      detectors.forEach((detector) => {
+        const position = positiveModulo(detector.direction - orangeStart, d360);
+        const resultIsOrange = position < d180;
+        detector.orange = resultIsOrange;
+        debug.detectors.push({ position, resultIsOrange, detector });
+      });
+      console.log(debug);
+    }
+  }
 }
 
 class Detector {
-  readonly #group = document.createElementNS("http://www.w3.org/2000/svg", "g");
-  constructor(public readonly sphere: Sphere) {
-    //
+  readonly #top = document.createElementNS("http://www.w3.org/2000/svg", "g");
+  readonly #circle = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "circle"
+  );
+  constructor(parent: SVGGElement) {
+    const arrow = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "polygon"
+    );
+    const circle = this.#circle;
+    this.#top.append(arrow, circle);
+    parent.appendChild(this.#top);
+    arrow.setAttribute(
+      "points",
+      "0.5 0,  0.6 -0.06,  0.6 -0.02,  0.77 -0.02,  0.77 0.02,  0.6 0.02,  0.6 0.06"
+    );
+    circle.style.strokeWidth = "0.03";
+    circle.style.stroke = "black";
+    circle.style.fill = "";
+    circle.cx.baseVal.value = 0.77;
+    circle.cy.baseVal.value = 0;
+    circle.r.baseVal.value = 0.07;
   }
-  update() {
-    this.setColor;
-    this.#group;
-    Detector;
-    //
+  #orange = true;
+  get orange() {
+    return this.#orange;
   }
-  private setColor(_newValue: "orange" | "white") {
-    //
+  set orange(newValue: boolean) {
+    this.#circle.style.fill = newValue ? "#ff7d00" : "white";
   }
   #direction = 0;
   get direction() {
     return this.#direction;
   }
+  /**
+   * Radians.
+   */
   set direction(newValue: number) {
     this.#direction = newValue;
-    //
-    this.update();
+    this.#top.style.transform = `rotate(${Sphere.FORMAT(newValue)}rad)`;
   }
 }
-Detector;
 
 {
   const svg = getById("overview1", SVGSVGElement);

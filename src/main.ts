@@ -497,7 +497,7 @@ class Sphere {
         detectors: new Array<unknown>(),
       };
       detectors.forEach((detector) => {
-        const position = positiveModulo(detector.direction - orangeStart, d360);
+        const position = positiveModulo(  orangeStart-detector.direction +d90, d360);
         const resultIsOrange = position < d180;
         detector.orange = resultIsOrange;
         debug.detectors.push({ position, resultIsOrange, detector });

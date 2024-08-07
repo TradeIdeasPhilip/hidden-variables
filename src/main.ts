@@ -489,7 +489,10 @@ class Sphere {
         d360
       );
       detectors.forEach((detector) => {
-        const position = positiveModulo(  orangeStart-detector.direction +d90, d360);
+        const position = positiveModulo(
+          orangeStart - detector.direction + d90,
+          d360
+        );
         const resultIsOrange = position < d180;
         detector.orange = resultIsOrange;
       });
@@ -733,17 +736,23 @@ overview2();
 
 async function overview3() {
   const svg = getById("overview3", SVGSVGElement);
-  const trianglePath = getById("overview3triangle", SVGPathElement);
   const sphere = new Sphere();
   sphere.x = 0.5;
   sphere.y = 0.5;
   svg.appendChild(sphere.top);
-  sphere.yAngle = d45;
+  sphere.addDetector();
   new AnimationLoop((time) => {
-    const newAngle = positiveModulo(time / 480, d360);
+    // The sphere rotates clockwise at the requested period.
+    const zPeriodInMS: DOMHighResTimeStamp = 480;
+    const newAngle = positiveModulo(time / zPeriodInMS, d360);
     sphere.zAngle = newAngle;
-    const color = newAngle > d90 && newAngle < 3 * d90 ? "white" : "#ff7d00";
-    trianglePath.style.fill = color;
+
+    // The sphere changes from a white crescent to an orange crescent and back
+    // once per period.  It passes through the 50/50 state on the way.  It is
+    // never a single color or almost entirely a single color.
+    const yPeriodInMS: DOMHighResTimeStamp = 15000;
+    sphere.yAngle =
+      Math.abs(positiveModulo(time / yPeriodInMS, d180) - d90) + d45;
   });
 }
 overview3();

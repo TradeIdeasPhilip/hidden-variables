@@ -112,7 +112,8 @@ g.sphere > circle {
 }
 
 #overview2text {
-  width: 10ch;
+  /* You don't want the width to get too small. Otherwise sometimes the height will grow and shrink because of word wrap. */
+  width: 15ch;
   flex-grow: 1;
 }
 
@@ -141,7 +142,6 @@ span.orange {
 }
 
 #overview3 {
-  width: 15em;
   height: 5em;
 }
 

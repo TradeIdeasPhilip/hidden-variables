@@ -1,82 +1,17 @@
-// TODO stop copying this and move it to phil-lib.
-
-/**
- * ```
- * const randomValue = lerp(lowestLegalValue, HighestLegalValue, Math.random())
- * ```
- * @param at0 `lerp(at0, at1, 0)` → at0
- * @param at1 `lerp(at0, at1, 1)` → at1
- * @param where
- * @returns
- */
-export function lerp(at0: number, at1: number, where: number) {
-  return at0 + (at1 - at0) * where;
-}
-
-/**
- * This is similar to `numerator % denominator`, i.e. modulo division.
- * The difference is that the result will never be negative.
- * If the numerator is negative `%`  will return a negative number.
- *
- * If the 0 point is chosen arbitrarily then you should use `positiveModulo()` rather than `%`.
- * For example, C's `time_t` and JavaScript's `Date.prototype.valueOf()` say that 0 means midnight January 1, 1970.
- * Negative numbers refer to times before midnight January 1, 1970, and positive numbers refer to times after midnight January 1, 1970.
- * But midnight January 1, 1970 was chosen arbitrarily, and you probably don't want to treat times before that differently than times after that.
- * And how many people would even think to test a negative date?
- *
- * `positiveModulo(n, d)` will give the same result as `positiveModulo(n + d, d)` for all vales of `n` and `d`.
- * (You might get 0 sometimes and -0 other times, but those are both `==` so I'm not worried about that.)
- */
-export function positiveModulo(numerator: number, denominator: number) {
-  const simpleAnswer = numerator % denominator;
-  if (simpleAnswer < 0) {
-    return simpleAnswer + Math.abs(denominator);
-  } else {
-    return simpleAnswer;
-  }
-}
-
-// Note that I modified this some after I copied it.
-// I removed the initial call to onWake.
-// That was causing some problems.
-// Now onWake() is only called by Chrome, and the time parameter should always be right.
-export class AnimationLoop {
-  constructor(private readonly onWake: (time: DOMHighResTimeStamp) => void) {
-    this.callback = this.callback.bind(this);
-    // This next line isn't quite right.
-    // Sometimes this timestamp is greater than the timestamp of the first requestAnimationFrame() callback.
-    // TODO fix it.
-    // this.callback(performance.now());
-    requestAnimationFrame(this.callback);
-  }
-  #cancelled = false;
-  cancel() {
-    this.#cancelled = true;
-  }
-  private callback(time: DOMHighResTimeStamp) {
-    if (!this.#cancelled) {
-      requestAnimationFrame(this.callback);
-      this.onWake(time);
-    }
-  }
-}
-
-// Copied from my curves repository.
-// I haven't pushed that repository to github yet, and I'm not sure why!
-// And I fixed something in this version.
 
 export type Point = { readonly x: number; readonly y: number };
 
-// TODO these should really be rays.  Two rays might not meet at all.
-// If they do meet, findIntersection() will give the right answer.
-// We need to know an angle, not a slope, to find that out.
-//
-// TODO if there is a problem matching the rays, we should draw a
-// straight line, instead of skipping the segment or drawing some
-// wild curves.  As learned from #SOME3.  Still skip the segment
-// if an input is NaN.
 export type Line = { x0: number; y0: number; slope: number };
 
+/**
+ * 
+ * @param α 
+ * @param β 
+ * @returns 
+ * @deprecated findIntersection() in path-shape.ts in random-svg-tests does this right.
+ * https://github.com/TradeIdeasPhilip/random-svg-tests/blob/ac3c9f9087a7fb440d03374e720365b1973835cd/src/path-shape.ts#L1375
+ * That file is still in works as is not ready for a library yet.
+ */
 export function findIntersection(α: Line, β: Line): Point | undefined {
   if (isNaN(α.slope) || isNaN(β.slope) || α.slope == β.slope) {
     return undefined;
@@ -97,21 +32,3 @@ export function findIntersection(α: Line, β: Line): Point | undefined {
   return { x, y };
 }
 
-// This is dead wrong in phil-lib/misc.ts!!!
-export function polarToRectangular(r: number, θ: number) {
-  return { x: Math.cos(θ) * r, y: Math.sin(θ) * r };
-}
-
-/**
- * Randomly reorder the contents of the array.
- * @param array The array to shuffle.  This is modified in place.
- * @returns The original array.
- */
-export function shuffleArray<T>(array: T[]) {
-  // https://stackoverflow.com/a/12646864/971955
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}

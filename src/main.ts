@@ -1,20 +1,16 @@
 // This is the preferred way to include a css file.
 import "./style.css";
 
-import { getById } from "phil-lib/client-misc";
-import {
-  AnimationLoop,
-  findIntersection,
-  Point,
-  positiveModulo,
-  polarToRectangular,
-  shuffleArray,
-} from "./utility";
+import { AnimationLoop, getById } from "phil-lib/client-misc";
+import { findIntersection, Point } from "./utility";
 import {
   initializedArray,
   LinearFunction,
   makeBoundedLinear,
   makeLinear,
+  polarToRectangular,
+  positiveModulo,
+  shuffleArray,
   sleep,
 } from "phil-lib/misc";
 
